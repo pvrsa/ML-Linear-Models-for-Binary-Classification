@@ -3,6 +3,7 @@
 using namespace std;
 
 void getInput(double X[][4] , int Y[] , int N);
+void getPriors(double* pC1,double* pC0,int Y[],int N);
 
 int main()
 {
@@ -11,9 +12,14 @@ int main()
 	int Y[N];
 
 	getInput(X,Y,N);
+	double pC1,pC0;
 
+	getPriors(&pC1,&pC0,Y,N);
+
+	cout << pC0 << " <- pC0   pC1 -> " << pC1 << endl; 
 	return 0;
 }
+
 
 
 void getInput(double X[][4] , int Y[] , int N){
@@ -34,5 +40,22 @@ void getInput(double X[][4] , int Y[] , int N){
 
 	    i++;
 	}
+
+}
+
+void getPriors(double* pC1,double* pC0,int Y[],int N){
+	int x=0;
+	int y=0;
+
+	for (int i = 0; i < N; ++i)
+	{
+		if(Y[i])
+			x++;
+		else
+			y++;
+	}
+
+	(*pC0) = (double)y / (double)N;
+	(*pC1) = (double)x / (double)N;
 
 }
