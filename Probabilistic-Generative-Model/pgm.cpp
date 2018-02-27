@@ -4,13 +4,26 @@
 
 using namespace std;
 
+
+// For training data
 const int N=960;
 double X[N][4];
 int Y[N];
 
+// For testing data
+const int Ntest=412;
+double Xtest[Ntest][4];
+int Ytest[Ntest];
+
+
+// Main functions
 void getInput(double X[][4],int Y[],int N,string lala);
+
+void PGM();
+
+
+//Helper functions
 void getPriors(double* pC1,double* pC0);
-double PGM();
 vector<double> calcMean(int y);
 vector<vector<double> > calcVar(vector<double> mean,int y);
 vector<vector<double> > addMatrix(vector<vector<double> > A,vector<vector<double> > B);
@@ -18,9 +31,7 @@ vector<vector<double> > addMatrix(vector<vector<double> > A,vector<vector<double
 double findLikelihood(int y,vector<double> mean,double invCovar[4][4],double detCovar,int row);
 
 
-const int Ntest=412;
-double Xtest[Ntest][4];
-int Ytest[Ntest];
+
 
 int main()
 {
@@ -57,7 +68,7 @@ void getInput(double X[][4],int Y[],int N,string lala){
 
 }
 
-double PGM(){
+void PGM(){
 	
 	double pC1,pC0;
 	getPriors(&pC1,&pC0);
@@ -86,7 +97,12 @@ double PGM(){
 	
 
 	double pXC0,pXC1,a,b,ans;
-	int correst = 0;
+	
+	int tp = 0;  // True positives
+	int tn = 0;	 // True negatives
+	int fp = 0;  // False positives
+	int fn = 0;  // False negatives
+
 	for(int i=0;i<Ntest;i++){
 
 		
@@ -102,15 +118,25 @@ double PGM(){
 
 		// cout << i << " " <<  ans << endl;
 
-		if(ans <= 0.5 && Ytest[i]){
-			correst++;
-		}else if(ans > 0.5 && Ytest[i]==0){
-			correst++;
-		}
+		if(ans <= 0.5)
+			if(Ytest[i])
+				tp++;
+			else
+				fp++;
+		else
+			if(Ytest[i] == 0)
+				tn++;
+			else
+				fn++;
+		
 
 	}
 	
-	cout << "ACCURACY = " << (double)correst/(double)Ntest << endl;
+	cout << "Confusion matrix \n" ;
+	cout << "True positives " << tp << endl;
+	cout << "True negatives " << tn << endl;
+	cout << "False positives " << fp << endl;
+	cout << "False negatives " << fn << endl;
 	
 	
 
@@ -204,8 +230,6 @@ double findLikelihood(int y,vector<double> mean,double invCovar[4][4],double det
 	double b = sqrt(detCovar);
 	double c = 4*pi*pi;
 
-	// cout << "a b c" << endl;
-	// cout << a << " " << b << " " << c << endl;
 	double ans = 1/(a*b*c);
 
 	return ans;
