@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-
+#include "inverse.h"
 #define pi 3.141592653
 
 using namespace std;
@@ -15,7 +15,7 @@ vector<double> calcMean(int y);
 vector<vector<double> > calcVar(vector<double> mean,int y);
 vector<vector<double> > addMatrix(vector<vector<double> > A,vector<vector<double> > B);
 
-double findLikelihood(int y,vector<double> mean,vector<vector<double> > covar,int row);
+double findLikelihood(int y,vector<double> mean,double invCovar[4][4],double detCovar,int row);
 
 
 const int Ntest=412;
@@ -68,35 +68,47 @@ double PGM(){
 	vector<vector<double> > var0 = calcVar(mean0,0);
 	vector<vector<double> > var1 = calcVar(mean1,1);
 	vector<vector<double> > covar = addMatrix(var0,var1);
+	double invCovar[D][D]; double covar2D[D][D];
 
+ 
 	for(int i = 0;i<4;i++){
-		for(int j=0;j<4;j++)
-			cout << covar[i][j] << " ";	
-		cout << endl;	
+		for(int j=0;j<4;j++){
+			covar2D[i][j] = covar[i][j];
+		}
 	}
 
+	double detCovar = determinant(covar2D,4);
+
+
+	inverse(covar2D,invCovar);
+	
+
+	
 
 	double pXC0,pXC1,a,b,ans;
 	int correst = 0;
-	// for(int i=0;i<Ntest;i++){
+	for(int i=0;i<Ntest;i++){
 
-	// 	cout << i << endl;
+		
 
-	// 	pXC0 = findLikelihood(0,mean0,covar,i);	
-	// 	pXC1 = findLikelihood(1,mean1,covar,i);
+		pXC0 = findLikelihood(0,mean0,invCovar,detCovar,i);	
+		pXC1 = findLikelihood(1,mean1,invCovar,detCovar,i);
 
-	// 	a = pXC0*pC0;
-	// 	b = pXC1*pC1;
-	// 	ans = a/(a+b);
+		// cout << pXC0 << " " << pXC1 << endl;
 
-	// 	if(ans <= 0.5 && Ytest[i]){
-	// 		correst++;
-	// 	}else if(ans > 0.5 && Ytest[i]==0){
-	// 		correst++;
-	// 	}
+		a = pXC0*pC0;
+		b = pXC1*pC1;
+		ans = a/(a+b);
 
+		// cout << i << " " <<  ans << endl;
 
-	// }
+		if(ans <= 0.5 && Ytest[i]){
+			correst++;
+		}else if(ans > 0.5 && Ytest[i]==0){
+			correst++;
+		}
+
+	}
 	
 	cout << "ACCURACY = " << (double)correst/(double)Ntest << endl;
 	
@@ -164,24 +176,37 @@ vector<vector<double> > calcVar(vector<double> mean,int y){
 	return ans;
 }
 
-double findLikelihood(int y,vector<double> mean,vector<vector<double> > covar,int row){
+double findLikelihood(int y,vector<double> mean,double invCovar[4][4],double detCovar,int row){
 	vector<double> temp;
+	double matrix[4] = {0,0,0,0};
+
 	for(int i=0;i<4;i++){
 		temp.push_back(Xtest[row][i] - mean[i]);
 	}
 
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			matrix[i] += temp[j]*invCovar[j][i];
+		}
+	}
 
+	double a = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		a += matrix[i]*temp[i];
+	}
+	
+	a /= 2;
 
-	// temp/=(2*covar);
+	a = exp(a);
+	double b = sqrt(detCovar);
+	double c = 4*pi*pi;
 
-	double a = 2*pi;
-	a*=a;
-
-	// double b = sqrt(covar);
-
-	// double c = exp(temp);
-
-	double ans = (1/(a));
+	// cout << "a b c" << endl;
+	// cout << a << " " << b << " " << c << endl;
+	double ans = 1/(a*b*c);
 
 	return ans;
 }
