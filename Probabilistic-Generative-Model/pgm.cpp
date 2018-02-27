@@ -25,8 +25,8 @@ int Ytest[Ntest];
 int main()
 {
 	
-	getInput(X,Y,N,"train.txt");
-	getInput(Xtest,Ytest,Ntest,"test.txt");
+	getInput(X,Y,N,"../train.txt");
+	getInput(Xtest,Ytest,Ntest,"../test.txt");
 	
 	PGM();
 	
