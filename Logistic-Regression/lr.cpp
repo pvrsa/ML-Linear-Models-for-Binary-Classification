@@ -62,19 +62,31 @@ void getInput(double X[][4],int Y[],int N,string lala){
 }
 
 void LogReg(){
-	double alpha=0.00001;
+	double alpha=0.001;
 	vector<double> gradient;
-	double epsilon;
-	int iterations = 15000;
+	double epsilon = 0.01;
+	int iterations = 0;
+	double check;
 
-	double W[5] = {1,1,1,1,1}; 
+	double W[5];
+
+	for(int i = 0;i<5;i++){
+		W[i] = (rand()%30) + 1;
+	}
+
 	do{
 		gradient = getGradient(W);
+		
+		check = 0;
+		for(int i = 0;i<5;i++){
+			check += gradient[i];
+		}
 
-		cout << "\n Iteration: " << iterations ;
+
+		cout << "\n Iteration: " << iterations << " : " ;
 	
 		for(int i = 0;i<5;i++){
-			// cout << gradient[i] << " " ;			
+			cout << gradient[i] << " " ;			
 			W[i] -= alpha * gradient[i];
 
 			// cout << W[i] << " " ;
@@ -83,7 +95,8 @@ void LogReg(){
 		cout << endl;
 
 		// sleep(1);
-	}while(iterations--);
+		iterations++;
+	}while(check > epsilon);
 
 
 	double ans;
