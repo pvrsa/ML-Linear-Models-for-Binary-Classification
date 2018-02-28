@@ -20,13 +20,13 @@ void FisherDA();
 
 //Helper Functions
 vector<double> calcMean(int y);
+double entrpy(int l0,int l1,int t0,int t1);
 
 int main()
 {
 	
 	getInput(X,Y,N,"../train.txt");
 	getInput(Xtest,Ytest,Ntest,"../test.txt");
-	
 	FisherDA();
 
 	return 0;
@@ -100,6 +100,7 @@ void FisherDA(){
             W[i]+=invSw[i][j]*difMeans[j];
         }
     }
+
     vector<pair<double,int> > R;
     double temp;
 
@@ -113,7 +114,45 @@ void FisherDA(){
 
     sort(R.begin() , R.end());
 
-   
+    int t0=0,t1=0;
+    for(int i=0;i<N;i++){
+        if(Y[i]==0)
+            t0++;
+    }
+    t1=N-t0;
+
+    int l0=0,l1=0;
+    double minen = INT_MAX;
+    double threshold = (R[0].first+R[1].first)/2;
+    
+    for(int i=0;i<N-1;i++){
+        if(Y[R[i].second]==0)
+            l0++;
+        else
+            l1++;
+        double yi = (R[i].first+R[i+1].first)/2;
+        double en = entrpy(l0,l1,t0,t1);
+        if (en<minen){
+            threshold=yi;
+            minen = en;
+        }
+    }
+
+    double correst = 0;
+    for(int i=0;i<Ntest;i++){
+        temp=0;
+        for(int j=0;j<4;j++){
+            temp+=Xtest[i][j]*W[j];
+        }
+
+        if(temp > threshold && Ytest[i])
+            correst++;
+        else if(temp<threshold && Ytest[i]==0)
+            correst++;
+       
+    }
+
+    cout << correst/(double)Ntest << endl;
 
 }
 
@@ -137,4 +176,20 @@ vector<double> calcMean(int y){
 
 	return ans;
 	
+}
+double entrpy(int l0,int l1,int t0,int t1){
+    double l = l0+l1;
+    double r = N-l;
+    double r0=t0-l0;
+    double r1=t1-l1;
+
+    double x = (l0/l)*(log(l0/l)) + (l1/l)*(log(l1/l));
+    double y = (r0/r)*(log(r0/r)) + (r1/r)*(log(r1/r));
+    
+    x*=(l/l+r);
+    y*=(r/l+r);
+    
+    double en=x+y;
+    en=(-en);
+    return en;
 }
