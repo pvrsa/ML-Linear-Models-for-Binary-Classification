@@ -138,21 +138,37 @@ void FisherDA(){
         }
     }
 
-    double correst = 0;
+
+    int tp = 0;  // True positives
+	int tn = 0;	 // True negatives
+	int fp = 0;  // False positives
+	int fn = 0;  // False negatives
+
     for(int i=0;i<Ntest;i++){
         temp=0;
         for(int j=0;j<4;j++){
             temp+=Xtest[i][j]*W[j];
         }
 
-        if(temp > threshold && Ytest[i])
-            correst++;
-        else if(temp<threshold && Ytest[i]==0)
-            correst++;
+        if(temp > threshold)
+            if(Ytest[i])
+                tp++;
+            else
+                fp++;
+        else
+            if(Ytest[i]==0)
+                tn++;
+            else
+                fn++;
+            
        
     }
 
-    cout << correst/(double)Ntest << endl;
+    cout << "Confusion matrix \n" ;
+	cout << "True positives " << tp << endl;
+	cout << "True negatives " << tn << endl;
+	cout << "False positives " << fp << endl;
+	cout << "False negatives " << fn << endl;
 
 }
 
